@@ -19,19 +19,27 @@ def determine_segment_type(xs, ys):
     """
     Determines whether a given line segment is of type linear, polynomial, or unknown.
     """
-    pass
+    return LineType.LINEAR
 
-def least_squares():
+def least_squares(xs, ys):
     """
     Uses least squares method to determine estimates of the parameters  𝑎  and  𝑏.
     """
-    pass
+    line_type = determine_segment_type(xs, ys)
+    if line_type == LineType.LINEAR:
+        xs = np.column_stack((np.ones(xs.shape), xs))
+        (a, b) = np.linalg.inv(xs.T.dot(xs)).dot(xs.T).dot(ys)
+    elif line_type == LineType.POLYNOMIAL:
+        pass
+    elif line_type == LineType.UNKNOWN:
+        pass
+    return (a, b)
 
-def calculate_error():
+def calculate_error(y, y_hat):
     """
     Calculates the error in the reconstructed signal.
     """
-    pass
+    return np.sum((y_hat - y) ** 2)
 
 def produce_figure(xs, ys):
     """
@@ -47,6 +55,10 @@ if __name__ == "__main__":
     else:
         file_path = args[0]
         xs, ys = utils.load_points_from_file(file_path)
+        a, b = least_squares(xs, ys)
+        error = calculate_error(ys, a + b * xs)
     
     if "--plot" in args:
         produce_figure(xs, ys)
+    
+    print(error)
