@@ -48,11 +48,16 @@ def calculate_error(y, y_hat):
     """
     return np.sum((y_hat - y) ** 2)
 
-def produce_figure(xs, ys):
+def produce_figure(xs, ys, line_segments):
     """
     Visualises the inputted data along with the calculated regression line
     """
-    utils.view_data_segments(xs, ys)
+    # utils.view_data_segments(xs, ys)
+    plt.scatter(xs, ys)
+    for seg in line_segments:
+        plt.plot(seg.xs, seg.ys, c="r")
+    plt.show()
+
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -78,6 +83,6 @@ if __name__ == "__main__":
             total_error += error
     
     if "--plot" in args:
-        produce_figure(xs, ys)
+        produce_figure(all_xs, all_ys, line_segments)
     
     print(total_error)
