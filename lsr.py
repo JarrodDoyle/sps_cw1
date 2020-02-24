@@ -14,13 +14,11 @@ def calculate_x_function(xs, ys):
     """
     return lambda x : x
 
-def least_squares(xs, ys, x_func):
+def least_squares(xs, ys):
     """
     Uses least squares method to determine estimates of the parameters  𝑎  and  𝑏.
     """
-    xs = np.column_stack((np.ones(xs.shape), x_func(xs)))
-    (a, b) = np.linalg.inv(xs.T.dot(xs)).dot(xs.T).dot(ys)
-    return (a, b)
+    return np.linalg.inv(xs.T.dot(xs)).dot(xs.T).dot(ys)
 
 def calculate_error(y, y_hat):
     """
@@ -47,13 +45,14 @@ def main(data):
         xs = all_xs[i*20:(i+1)*20]
         ys = all_ys[i*20:(i+1)*20]
 
-        x_func = calculate_x_function(xs, ys)
-        a, b = least_squares(xs, ys, x_func)
+        xs_m = np.column_stack((np.ones(xs.shape), xs, xs**2, xs**3))
+        cs = least_squares(xs_m, ys)
         new_xs = np.linspace(xs.min(), xs.max(), 100)
-        new_ys = a + b * x_func(new_xs)
+        new_xs_m = np.column_stack((np.ones(new_xs.shape), new_xs, new_xs**2, new_xs**3))
+        new_ys = new_xs_m.dot(cs)
         line_segments.append((new_xs, new_ys))
         
-        total_error += calculate_error(ys, a + b * xs)
+        total_error += calculate_error(ys, xs_m.dot(cs))
     return total_error, line_segments
 
 if __name__ == "__main__":
