@@ -42,8 +42,11 @@ def produce_figure(xs, ys):
 if __name__ == "__main__":
     args = sys.argv[1:]
 
-    file_path = args[0]
-    xs, ys = utils.load_points_from_file(file_path)
+    if len(args) == 0:
+        print("No filepath supplied.")
+    else:
+        file_path = args[0]
+        xs, ys = utils.load_points_from_file(file_path)
     
     if "--plot" in args:
         produce_figure(xs, ys)
