@@ -44,6 +44,27 @@ def produce_figure(xs, ys, line_segments):
         plt.plot(xs, ys, c="r")
     plt.show()
 
+def main(data):
+    all_xs, all_ys = data
+    number_of_segments = len(all_xs) // 20
+    line_segments = []
+    total_error = 0
+
+    for i in range(number_of_segments):
+        xs = all_xs[i*20:(i+1)*20]
+        ys = all_ys[i*20:(i+1)*20]
+
+        segment_type = determine_segment_type(xs, ys)
+        if segment_type == LineType.LINEAR:
+            a, b = least_squares(xs, ys, lambda x: x)
+            line_segments.append((xs, ys))
+        elif segment_type == LineType.POLYNOMIAL:
+            pass
+        elif segment_type == LineType.UNKNOWN:
+            pass
+        
+        total_error += calculate_error(ys, a + b * xs)
+    return total_error, line_segments
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -52,28 +73,10 @@ if __name__ == "__main__":
         print("No filepath supplied.")
     else:
         file_path = args[0]
-        all_xs, all_ys = utils.load_points_from_file(file_path)
+        xs, ys = utils.load_points_from_file(file_path)
+        error, line_segments = main((xs, ys))      
 
-        number_of_segments = len(all_xs) // 20
-        line_segments = []
-        total_error = 0
-
-        for i in range(number_of_segments):
-            xs = all_xs[i*20:(i+1)*20]
-            ys = all_ys[i*20:(i+1)*20]
-
-            segment_type = determine_segment_type(xs, ys)
-            if segment_type == LineType.LINEAR:
-                a, b = least_squares(xs, ys, lambda x: x)
-                line_segments.append((xs, ys))
-            elif segment_type == LineType.POLYNOMIAL:
-                pass
-            elif segment_type == LineType.UNKNOWN:
-                pass
-            
-            total_error += calculate_error(ys, a + b * xs)
+        if "--plot" in args:
+            produce_figure(xs, ys, line_segments)
     
-    if "--plot" in args:
-        produce_figure(all_xs, all_ys, line_segments)
-    
-    print(total_error)
+        print(error)
