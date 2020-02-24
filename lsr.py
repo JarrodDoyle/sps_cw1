@@ -21,18 +21,12 @@ def determine_segment_type(xs, ys):
     """
     return LineType.LINEAR
 
-def least_squares(xs, ys):
+def least_squares(xs, ys, x_func):
     """
     Uses least squares method to determine estimates of the parameters  𝑎  and  𝑏.
     """
-    line_type = determine_segment_type(xs, ys)
-    if line_type == LineType.LINEAR:
-        xs = np.column_stack((np.ones(xs.shape), xs))
-        (a, b) = np.linalg.inv(xs.T.dot(xs)).dot(xs.T).dot(ys)
-    elif line_type == LineType.POLYNOMIAL:
-        pass
-    elif line_type == LineType.UNKNOWN:
-        pass
+    xs = np.column_stack((np.ones(xs.shape), x_func(xs)))
+    (a, b) = np.linalg.inv(xs.T.dot(xs)).dot(xs.T).dot(ys)
     return (a, b)
 
 def calculate_error(y, y_hat):
@@ -45,7 +39,6 @@ def produce_figure(xs, ys, line_segments):
     """
     Visualises the inputted data along with the calculated regression line
     """
-    # utils.view_data_segments(xs, ys)
     plt.scatter(xs, ys)
     for (xs, ys) in line_segments:
         plt.plot(xs, ys, c="r")
@@ -69,11 +62,16 @@ if __name__ == "__main__":
             xs = all_xs[i*20:(i+1)*20]
             ys = all_ys[i*20:(i+1)*20]
 
-            a, b = least_squares(xs, ys)
-            error = calculate_error(ys, a + b * xs)
-
-            line_segments.append((xs, ys))
-            total_error += error
+            segment_type = determine_segment_type(xs, ys)
+            if segment_type == LineType.LINEAR:
+                a, b = least_squares(xs, ys, lambda x: x)
+                line_segments.append((xs, ys))
+            elif segment_type == LineType.POLYNOMIAL:
+                pass
+            elif segment_type == LineType.UNKNOWN:
+                pass
+            
+            total_error += calculate_error(ys, a + b * xs)
     
     if "--plot" in args:
         produce_figure(all_xs, all_ys, line_segments)
