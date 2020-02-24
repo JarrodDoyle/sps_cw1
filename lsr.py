@@ -7,19 +7,12 @@ import matplotlib.pyplot as plt
 
 import sys
 import utilities as utils
-from enum import Enum
 
-class LineType(Enum):
-    LINEAR = 1
-    POLYNOMIAL = 2
-    UNKNOWN = 3
-
-
-def determine_segment_type(xs, ys):
+def calculate_x_function(xs, ys):
     """
-    Determines whether a given line segment is of type linear, polynomial, or unknown.
+    Returns a lambda function representing the function applied to x in the given line segment.
     """
-    return LineType.LINEAR
+    return lambda x : x
 
 def least_squares(xs, ys, x_func):
     """
@@ -54,14 +47,11 @@ def main(data):
         xs = all_xs[i*20:(i+1)*20]
         ys = all_ys[i*20:(i+1)*20]
 
-        segment_type = determine_segment_type(xs, ys)
-        if segment_type == LineType.LINEAR:
-            a, b = least_squares(xs, ys, lambda x: x)
-            line_segments.append((xs, ys))
-        elif segment_type == LineType.POLYNOMIAL:
-            pass
-        elif segment_type == LineType.UNKNOWN:
-            pass
+        x_func = calculate_x_function(xs, ys)
+        a, b = least_squares(xs, ys, x_func)
+        new_xs = np.linspace(xs.min(), xs.max(), 100)
+        new_ys = a + b * x_func(new_xs)
+        line_segments.append((new_xs, new_ys))
         
         total_error += calculate_error(ys, a + b * xs)
     return total_error, line_segments
