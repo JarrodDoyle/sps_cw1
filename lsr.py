@@ -15,13 +15,6 @@ class LineType(Enum):
     UNKNOWN = 3
 
 
-class Line:
-    def __init__(self, xs, ys, a, b):
-        self.xs = xs
-        self.ys = ys
-        self.a = a
-        self.b = b
-
 def determine_segment_type(xs, ys):
     """
     Determines whether a given line segment is of type linear, polynomial, or unknown.
@@ -54,8 +47,8 @@ def produce_figure(xs, ys, line_segments):
     """
     # utils.view_data_segments(xs, ys)
     plt.scatter(xs, ys)
-    for seg in line_segments:
-        plt.plot(seg.xs, seg.ys, c="r")
+    for (xs, ys) in line_segments:
+        plt.plot(xs, ys, c="r")
     plt.show()
 
 
@@ -79,7 +72,7 @@ if __name__ == "__main__":
             a, b = least_squares(xs, ys)
             error = calculate_error(ys, a + b * xs)
 
-            line_segments.append(Line(xs, ys, a, b))
+            line_segments.append((xs, ys))
             total_error += error
     
     if "--plot" in args:
