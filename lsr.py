@@ -8,12 +8,6 @@ import matplotlib.pyplot as plt
 import sys
 import utilities as utils
 
-def calculate_x_function(xs, ys):
-    """
-    Returns a lambda function representing the function applied to x in the given line segment.
-    """
-    return lambda x : x
-
 def least_squares(xs, ys):
     """
     Uses least squares method to determine estimates of the parameters  𝑎  and  𝑏.
@@ -45,14 +39,30 @@ def main(data):
         xs = all_xs[i*20:(i+1)*20]
         ys = all_ys[i*20:(i+1)*20]
 
+        # As a linear regression
+        xs_m = np.column_stack((np.ones(xs.shape), xs))
+        cs = least_squares(xs_m, ys)
+        e1 = calculate_error(ys, xs_m.dot(cs))
+        l1 = (xs, xs_m.dot(cs))
+
+        # As a polynomial regression
         xs_m = np.column_stack((np.ones(xs.shape), xs, xs**2, xs**3))
         cs = least_squares(xs_m, ys)
+        e2 = calculate_error(ys, xs_m.dot(cs))
+
         new_xs = np.linspace(xs.min(), xs.max(), 100)
-        new_xs_m = np.column_stack((np.ones(new_xs.shape), new_xs, new_xs**2, new_xs**3))
-        new_ys = new_xs_m.dot(cs)
-        line_segments.append((new_xs, new_ys))
-        
-        total_error += calculate_error(ys, xs_m.dot(cs))
+        new_xs_m = np.column_stack((np.ones(new_xs.shape), new_xs, new_xs**2, new_xs**3))    
+        l2 = (new_xs, new_xs_m.dot(cs))
+
+        if e1 <= e2:
+            print("Linear")
+            line_segments.append(l1)
+            total_error += e1
+        else:
+            print("Polynomial")
+            line_segments.append(l2)
+            total_error += e2
+
     return total_error, line_segments
 
 if __name__ == "__main__":
