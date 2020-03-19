@@ -42,29 +42,35 @@ def main(data):
         xs = all_xs[i*20:(i+1)*20]
         ys = all_ys[i*20:(i+1)*20]
 
+        x_train = xs[:15]
+        x_test = xs[15:]
+
+        y_train = ys[:15]
+        y_test = ys[15:]
+
         # As a linear regression
-        xs_m = np.column_stack((np.ones(xs.shape), xs))
-        cs = least_squares(xs_m, ys)
-        e1 = calculate_error(ys, xs_m.dot(cs))
-        l1 = (xs, xs_m.dot(cs))
+        l_cs = least_squares(np.column_stack((np.ones(x_train.shape), x_train)), y_train)
+        l_ys = (np.column_stack((np.ones(x_test.shape), x_test))).dot(l_cs)
+        l_cve = calculate_error(y_test, l_ys).mean()
 
         # As a polynomial regression
-        xs_m = np.column_stack((np.ones(xs.shape), xs, xs**2, xs**3))
-        cs = least_squares(xs_m, ys)
-        e2 = calculate_error(ys, xs_m.dot(cs))
+        p_cs = least_squares(np.column_stack((np.ones(x_train.shape), x_train, x_train**2, x_train**3)), y_train)
+        p_ys = (np.column_stack((np.ones(x_test.shape), x_test, x_test**2, x_test**3))).dot(p_cs)
+        p_cve = calculate_error(y_test, p_ys).mean()
 
-        new_xs = np.linspace(xs.min(), xs.max(), 100)
-        new_xs_m = np.column_stack((np.ones(new_xs.shape), new_xs, new_xs**2, new_xs**3))    
-        l2 = (new_xs, new_xs_m.dot(cs))
-
-        if e1 <= e2:
-            print("Linear")
-            line_segments.append(l1)
-            total_error += e1
+        if l_cve <= p_cve:
+            print("linear")
+            cs = least_squares(np.column_stack((np.ones(xs.shape), xs)), ys)
+            y_hat = np.column_stack((np.ones(xs.shape), xs)).dot(cs)
+            line_segments.append((xs, y_hat))
+            total_error += calculate_error(ys, y_hat)
         else:
-            print("Polynomial")
-            line_segments.append(l2)
-            total_error += e2
+            print("polynomial")
+            new_xs = np.linspace(xs.min(), xs.max(), 100)
+            cs = least_squares(np.column_stack((np.ones(xs.shape), xs, xs**2, xs**3)), ys)
+            new_y_hat = np.column_stack((np.ones(new_xs.shape), new_xs, new_xs**2, new_xs**3)).dot(cs)
+            line_segments.append((new_xs, new_y_hat))
+            total_error += calculate_error(ys, np.column_stack((np.ones(xs.shape), xs, xs**2, xs**3)).dot(cs))
 
     return total_error, line_segments
 
