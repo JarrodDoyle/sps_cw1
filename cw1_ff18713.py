@@ -4,6 +4,7 @@ import numpy as np
 from skimage import data, io, color, transform, exposure
 from scipy import stats
 import matplotlib.pyplot as plt
+from math import inf
 
 import sys
 import utilities as utils
@@ -54,30 +55,23 @@ def main(data):
         y_train = ys[:15]
         y_test = ys[15:]
 
-        # As a linear regression
-        l_cs = least_squares(chebyshev(x_train, 1), y_train)
-        l_ys = (chebyshev(x_test, 1)).dot(l_cs)
-        l_cve = calculate_error(y_test, l_ys).mean()
+        lowest_cve = inf
+        best_order = None
+        for j in range(1, 6):
+            coefficients = least_squares(chebyshev(x_train, j), y_train)
+            y_hat = chebyshev(x_test, j).dot(coefficients)
+            cve = calculate_error(y_test, y_hat).mean()
+            if cve < lowest_cve:
+                lowest_cve = cve
+                best_order = j
 
-        # As a polynomial regression
-        p_cs = least_squares(chebyshev(x_train, 3), y_train)
-        p_ys = chebyshev(x_test, 3).dot(p_cs)
-        p_cve = calculate_error(y_test, p_ys).mean()
-
-        if l_cve <= p_cve:
-            print("linear")
-            cs = least_squares(chebyshev(xs, 1), ys)
-            y_hat = chebyshev(xs, 1).dot(cs)
-            line_segments.append((xs, y_hat))
-            total_error += calculate_error(ys, y_hat)
-        else:
-            print("polynomial")
-            new_xs = np.linspace(xs.min(), xs.max(), 100)
-            cs = least_squares(chebyshev(xs, 3), ys)
-            new_y_hat = chebyshev(new_xs, 3).dot(cs)
-            line_segments.append((new_xs, new_y_hat))
-            total_error += calculate_error(ys, chebyshev(xs, 3).dot(cs))
-
+        print(f"Line segment is polynomial of order {best_order}")
+        new_xs = np.linspace(xs.min(), xs.max(), 100)
+        cs = least_squares(chebyshev(xs, best_order), ys)
+        
+        line_segments.append((new_xs, chebyshev(new_xs, best_order).dot(cs)))
+        total_error += calculate_error(ys, chebyshev(xs, best_order).dot(cs))
+    
     return total_error, line_segments
 
 if __name__ == "__main__":
