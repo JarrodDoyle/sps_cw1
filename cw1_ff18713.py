@@ -9,8 +9,11 @@ import sys
 import utilities as utils
 
 def least_squares(xs, ys):
-    """
-    Uses least squares method to determine estimates of the parameters  𝑎  and  𝑏.
+    """Use least squares method to estimate parameters of a function
+    
+    Args:
+        xs: Nx(p+1) matrix where p is the power of the polynomial function. First column is full of 1's. Subsequent columns are x values raised to a power.
+        ys: Nx1 matrix of y values.
     """
     return np.linalg.inv(xs.T.dot(xs)).dot(xs.T).dot(ys)
 
