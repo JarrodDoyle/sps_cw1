@@ -1,13 +1,6 @@
 from __future__ import print_function
 
-import numpy as np
-from skimage import data, io, color, transform, exposure
-from scipy import stats
-import matplotlib.pyplot as plt
-import random
-
-import sys
-import utilities as utils
+from utilities import *
 
 def least_squares(xs, ys):
     """Use least squares method to estimate parameters of a function
@@ -127,7 +120,7 @@ if __name__ == "__main__":
         print("No filepath supplied.")
     else:
         file_path = args[0]
-        xs, ys = utils.load_points_from_file(file_path)
+        xs, ys = load_points_from_file(file_path)
         error, line_segments = main((xs, ys))      
 
         if "--plot" in args:
