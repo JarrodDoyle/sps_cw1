@@ -57,7 +57,28 @@ def create_folds(xs, ys, k):
         y_tests.append(shuffled_ys[r1:r2])
         y_trains.append(np.concatenate((shuffled_ys[:r1], shuffled_ys[r2:])))
     
-    return x_tests, x_trains, y_tests, y_trains
+    return (x_trains, x_tests, y_trains, y_tests)
+
+#def get_folds(arr, k):
+#    sarr = arr[]
+
+def polynomial_cve(folds, e, k):
+    x1, x2, y1, y2 = folds
+    cves = []
+    for i in range(k):
+        cs = least_squares(chebyshev(x1[i], e), y1[i])
+        y_hat = chebyshev(x2[i], e).dot(cs)
+        cves.append(calculate_error(y2[i], y_hat).mean())
+    return np.mean(cves)
+
+def sinusoidal_cve(folds, k):
+    x1, x2, y1, y2 = folds
+    cves = []
+    for i in range(k):
+        cs = least_squares(np.column_stack((np.ones(x1[i].shape), np.sin(x1[i]))), y1[i])
+        y_hat = np.column_stack((np.ones(x2[i].shape), np.sin(x2[i]))).dot(cs)
+        cves.append(calculate_error(y2[i], y_hat).mean())
+    return np.mean(cves)
 
 def main(data):
     all_xs, all_ys = data
@@ -71,42 +92,24 @@ def main(data):
 
         # Setup folds for cross-validation.
         k = 10
-        x_tests, x_trains, y_tests, y_trains = create_folds(xs, ys, k)
+        folds = create_folds(xs, ys, k)
 
-        lowest_cve = np.inf
-        best_order = None
-        # Linear + polynomial (cubed)
-        for j in [1, 3]:
-            # K-fold cross-validation
-            cves = []
-            for l in range(k):
-                coefficients = least_squares(chebyshev(x_trains[l], j), y_trains[l])
-                y_hat = chebyshev(x_tests[l], j).dot(coefficients)
-                cves.append(calculate_error(y_tests[l], y_hat).mean())
-            cve = np.mean(cves)
-            if cve < lowest_cve:
-                lowest_cve = cve
-                best_order = j
+        lin_cve = polynomial_cve(folds, 1, k)
+        pol_cve = polynomial_cve(folds, 2, k)
+        sin_cve = sinusoidal_cve(folds, k)
 
-        # Sinusoidal (y = asin(wx) + b)
-        cves = []
-        for l in range(k):
-            coefficients = least_squares(np.column_stack((np.ones(x_trains[l].shape), np.sin(x_trains[l]))), y_trains[l])
-            y_hat = np.column_stack((np.ones(x_tests[l].shape), np.sin(x_tests[l]))).dot(coefficients)
-            cves.append(calculate_error(y_tests[l], y_hat).mean())
-        cve = np.mean(cves)
-        
         new_xs = np.linspace(xs.min(), xs.max(), 100)
-        if cve < lowest_cve:
+        if sin_cve < min(lin_cve, pol_cve):
             print(f"Line segment is sinusoidal")
             cs = least_squares(np.column_stack((np.ones(xs.shape), np.sin(xs))), ys)
             new_ys = np.column_stack((np.ones(new_xs.shape), np.sin(new_xs))).dot(cs)
             y_hat = np.column_stack((np.ones(xs.shape), np.sin(xs))).dot(cs)
         else:
-            print(f"Line segment is polynomial of order {best_order}")
-            cs = least_squares(chebyshev(xs, best_order), ys)
-            new_ys = chebyshev(new_xs, best_order).dot(cs)
-            y_hat = chebyshev(xs, best_order).dot(cs)
+            order = 1 if lin_cve < pol_cve else 2 
+            print(f"Line segment is polynomial of order {order}")
+            cs = least_squares(chebyshev(xs, order), ys)
+            new_ys = chebyshev(new_xs, order).dot(cs)
+            y_hat = chebyshev(xs, order).dot(cs)
         
         line_segments.append((new_xs, new_ys))
         total_error += calculate_error(ys, y_hat)
