@@ -3,24 +3,20 @@ from __future__ import print_function
 from utilities import *
 
 def least_squares(xs, ys):
-    """Use least squares method to estimate parameters of a function
+    """Return estimated function parameters using least squares method.
     
-    Args:
+    Parameters:
         xs: Nx(p+1) matrix where p is the power of the polynomial function. First column is full of 1's. Subsequent columns are x values raised to a power.
         ys: Nx1 matrix of y values.
     """
     return np.linalg.inv(xs.T.dot(xs)).dot(xs.T).dot(ys)
 
 def calculate_error(y, y_hat):
-    """
-    Calculates the error in the reconstructed signal.
-    """
+    """Returns the error value of the reconstructed signal."""
     return np.sum((y_hat - y) ** 2)
 
 def produce_figure(xs, ys, line_segments):
-    """
-    Visualises the inputted data along with the calculated regression line
-    """
+    """Displays a plot of the data points and the calculated regression line."""
     plt.scatter(xs, ys)
     for (xs, ys) in line_segments:
         plt.plot(xs, ys, c="r")
@@ -33,12 +29,13 @@ def chebyshev(xs, order):
     return new_xs
 
 def shuffle_lists(xs, ys):
+    """Returns shuffled xs an ys such that pairings are maintained."""
     indices = np.arange(xs.shape[0])
     np.random.shuffle(indices)
     return xs[indices], ys[indices]
 
 def create_folds(xs, ys, k):
-    # Shuffle xs and ys such that they maintain their pairings and then create splits
+    """Return k sets of test and train data for xs and ys"""
     r = shuffle_lists(xs, ys)
     s_xs, s_ys = np.array_split(r[0], k), np.array_split(r[1], k)
     
