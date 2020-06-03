@@ -38,28 +38,16 @@ def shuffle_lists(xs, ys):
     return xs[indices], ys[indices]
 
 def create_folds(xs, ys, k):
-    # Shuffle xs and ys such that they maintain their pairings
-    shuffled_xs, shuffled_ys = shuffle_lists(xs, ys)
-
-    # Calculate fold size, will give an error if k is not an appropriate value for the given data set
-    fold_size = len(xs) / k
-
-    x_tests = []
-    x_trains = []
-    y_tests = []
-    y_trains = []
-
-    for i in range(k):
-        r1 = int(i*fold_size)
-        r2 = int((i+1)*fold_size)
-
-        x_tests.append(shuffled_xs[r1:r2])
-        x_trains.append(np.concatenate((shuffled_xs[:r1], shuffled_xs[r2:])))
-
-        y_tests.append(shuffled_ys[r1:r2])
-        y_trains.append(np.concatenate((shuffled_ys[:r1], shuffled_ys[r2:])))
+    # Shuffle xs and ys such that they maintain their pairings and then create splits
+    r = shuffle_lists(xs, ys)
+    s_xs, s_ys = np.array_split(r[0], k), np.array_split(r[1], k)
     
-    return (x_trains, x_tests, y_trains, y_tests)
+    folds = {"x": [], "y": []}
+    for i in range(k):
+        folds["x"].append([s_xs[i], np.append(s_xs[:i], s_xs[i+1:])])
+        folds["y"].append([s_ys[i], np.append(s_ys[:i], s_ys[i+1:])])
+    
+    return folds
 
 def pol_cve(x1, x2, y1, y2, e):
     cs = least_squares(chebyshev(x1, e), y1)
@@ -72,25 +60,22 @@ def sin_cve(x1, x2, y1, y2):
     return calculate_error(y2, y_hat).mean()
 
 def perform_k_fold_validation(xs, ys, k):
-    x1, x2, y1, y2 = create_folds(xs, ys, k)
+    folds = create_folds(xs, ys, k)
     cves = {"lin": [], "pol": [], "sin": []}
     for i in range(k):
-        cves["lin"].append(pol_cve(x1[i], x2[i], y1[i], y2[i], 1))
-        cves["pol"].append(pol_cve(x1[i], x2[i], y1[i], y2[i], 2))
-        cves["sin"].append(sin_cve(x1[i], x2[i], y1[i], y2[i]))
+        (x2, x1), (y2, y1) = folds["x"][i], folds["y"][i]
+        cves["lin"].append(pol_cve(x1, x2, y1, y2, 1))
+        cves["pol"].append(pol_cve(x1, x2, y1, y2, 2))
+        cves["sin"].append(sin_cve(x1, x2, y1, y2))
     
     return np.mean(cves["lin"]), np.mean(cves["pol"]), np.mean(cves["sin"])
 
-def main(data):
-    all_xs, all_ys = data
-    number_of_segments = len(all_xs) // 20
+def main(data, n):
+    split_xs, split_ys = np.array_split(data[0], n), np.array_split(data[1], n)
     line_segments = []
     total_error = 0
-
-    for i in range(number_of_segments):
-        xs = all_xs[i*20:(i+1)*20]
-        ys = all_ys[i*20:(i+1)*20]
-
+    
+    for (xs, ys) in zip(split_xs, split_ys):
         lin_cve, pol_cve, sin_cve = perform_k_fold_validation(xs, ys, 10)
 
         new_xs = np.linspace(xs.min(), xs.max(), 100)
@@ -119,7 +104,7 @@ if __name__ == "__main__":
     else:
         file_path = args[0]
         xs, ys = load_points_from_file(file_path)
-        error, line_segments = main((xs, ys))      
+        error, line_segments = main((xs, ys), len(xs) // 20)      
 
         if "--plot" in args:
             produce_figure(xs, ys, line_segments)
