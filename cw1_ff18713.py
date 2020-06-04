@@ -2,6 +2,9 @@ from __future__ import print_function
 
 from utilities import *
 
+POLY_POWER = 3
+K_VALUE = 20
+
 def least_squares(xs, ys):
     """Return estimated function parameters using least squares method.
     
@@ -22,7 +25,7 @@ def produce_figure(xs, ys, line_segments):
         plt.plot(xs, ys, c="r")
     plt.show()
 
-def chebyshev(xs, order):
+def gen_polynomial_matrix(xs, order):
     new_xs = np.array(np.ones(xs.shape))
     for i in range(order):
         new_xs = np.column_stack((new_xs, xs**(i+1)))
@@ -43,12 +46,11 @@ def create_folds(xs, ys, k):
     for i in range(k):
         folds["x"].append([s_xs[i], np.append(s_xs[:i], s_xs[i+1:])])
         folds["y"].append([s_ys[i], np.append(s_ys[:i], s_ys[i+1:])])
-    
     return folds
 
 def pol_cve(x1, x2, y1, y2, e):
-    cs = least_squares(chebyshev(x1, e), y1)
-    y_hat = chebyshev(x2, e).dot(cs)
+    cs = least_squares(gen_polynomial_matrix(x1, e), y1)
+    y_hat = gen_polynomial_matrix(x2, e).dot(cs)
     return calculate_error(y2, y_hat).mean()
 
 def sin_cve(x1, x2, y1, y2):
@@ -62,9 +64,8 @@ def perform_k_fold_validation(xs, ys, k):
     for i in range(k):
         (x2, x1), (y2, y1) = folds["x"][i], folds["y"][i]
         cves["lin"].append(pol_cve(x1, x2, y1, y2, 1))
-        cves["pol"].append(pol_cve(x1, x2, y1, y2, 2))
+        cves["pol"].append(pol_cve(x1, x2, y1, y2, POLY_POWER))
         cves["sin"].append(sin_cve(x1, x2, y1, y2))
-    
     return np.mean(cves["lin"]), np.mean(cves["pol"]), np.mean(cves["sin"])
 
 def main(data, n):
@@ -77,27 +78,31 @@ def main(data, n):
 
         new_xs = np.linspace(xs.min(), xs.max(), 100)
         if sin_cve < min(lin_cve, pol_cve):
-            print(f"Line segment is sinusoidal")
+            # print("Sinusoidal")
             cs = least_squares(np.column_stack((np.ones(xs.shape), np.sin(xs))), ys)
             new_ys = np.column_stack((np.ones(new_xs.shape), np.sin(new_xs))).dot(cs)
             y_hat = np.column_stack((np.ones(xs.shape), np.sin(xs))).dot(cs)
         else:
-            order = 1 if lin_cve < pol_cve else 2 
-            print(f"Line segment is polynomial of order {order}")
-            cs = least_squares(chebyshev(xs, order), ys)
-            new_ys = chebyshev(new_xs, order).dot(cs)
-            y_hat = chebyshev(xs, order).dot(cs)
+            order = 1 if lin_cve < pol_cve else POLY_POWER 
+            # print("Linear" if order == 1 else "Polynomial")
+            cs = least_squares(gen_polynomial_matrix(xs, order), ys)
+            new_ys = gen_polynomial_matrix(new_xs, order).dot(cs)
+            y_hat = gen_polynomial_matrix(xs, order).dot(cs)
         
         line_segments.append((new_xs, new_ys))
         total_error += calculate_error(ys, y_hat)
-    
     return total_error, line_segments
 
 if __name__ == "__main__":
     args = sys.argv[1:]
 
     if len(args) == 0:
-        print("No filepath supplied.")
+        print("No filepath supplied. Running on all.")
+        files = {"basic": 5, "adv": 3, "noise": 3}
+        for k, v in files.items():
+            for i in range(v):
+                xs, ys = load_points_from_file(f"train_data/{k}_{i+1}.csv")
+                print(f"{k}_{i+1}: " + str(main((xs, ys), len(xs) // 20)[0]))
     else:
         file_path = args[0]
         xs, ys = load_points_from_file(file_path)

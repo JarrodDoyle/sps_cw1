@@ -25,30 +25,9 @@
     </head>
     <body class="vscode-light">
         <h1 id="cw1-an-unknown-signal-">CW1: An Unknown Signal <!-- omit in toc --></h1>
-<p><strong>Table of contents</strong></p>
-<ul>
-<li><a href="#1-implementation">1. Implementation</a>
-<ul>
-<li><a href="#11-determining-the-line-functions">1.1. Determining the line functions</a></li>
-<li><a href="#12-splitting-the-data">1.2. Splitting the data</a></li>
-<li><a href="#13-estimating-function-variables">1.3. Estimating function variables</a></li>
-<li><a href="#14-calculating-error">1.4. Calculating error</a></li>
-<li><a href="#15-line-classification">1.5. Line classification</a></li>
-<li><a href="#16-plotting-the-regression-line">1.6. Plotting the regression line</a></li>
-</ul>
-</li>
-<li><a href="#2-figures">2. Figures</a></li>
-<li><a href="#3-potential-extensions">3. Potential extensions</a>
-<ul>
-<li><a href="#31-continuous-lines">3.1. Continuous lines</a></li>
-<li><a href="#32-more-line-functions">3.2. More line functions</a></li>
-<li><a href="#variable-line-segment-lengths">Variable line segment lengths</a></li>
-</ul>
-</li>
-</ul>
 <h1 id="1-implementation">1. Implementation</h1>
 <h2 id="11-determining-the-line-functions">1.1. Determining the line functions</h2>
-<p>Line classification is a large part of this project so the first thing to do is define the set of potential line types. For each of the training sets provided, a plot was generated. By examining these plots the line functions can be determined to be linear, quadratic, and sinusoidal.</p>
+<p><strong>Line</strong> classification is a large part of this project so the first thing to do is define the set of potential line types. For each of the training sets provided, a plot was generated. By examining these plots the line functions can be determined to be linear, cubic, and sinusoidal.</p>
 <h2 id="12-splitting-the-data">1.2. Splitting the data</h2>
 <p>Each line segment is exactly 20 data points. As each line segment is being considered individually, the first step is to separate the data into chunks. This can be done simply using <code>numpy.array_split(data, len(data // 20))</code>.</p>
 <h2 id="13-estimating-function-variables">1.3. Estimating function variables</h2>
@@ -58,7 +37,7 @@
 <p>The reconstruction error of our generated regression lines is the sum squared error. The formula for calculating the sum squared error is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>i</mi></msub><mo stretchy="false">(</mo><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sum_i (\hat{y}_i - y_i)^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0497100000000001em;vertical-align:-0.29971000000000003em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.16195399999999993em;"><span style="top:-2.40029em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.29971000000000003em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.19444em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> which can be calculated with <code>numpy.sum((y_hat - y) ** 2)</code>.</p>
 <h2 id="15-line-classification">1.5. Line classification</h2>
 <p>Lines can be simply classified as the function which gives the lowest reconstruction error. However, each line segment is made up of only 20 data points; this is quite limited in size and means any outliers may have a large effect on the model and lead to overfitting.</p>
-<p>To prevent this overfit, a model validation technique such as k-fold cross-validation can be used. In my implementation I chose to use a k-value of 10.</p>
+<p>To prevent this overfit, a model validation technique such as k-fold cross-validation can be used. In my implementation I chose to use a k-value of 20 (making it the same as leave-one-out cross-validation).</p>
 <p>The process of performing k-fold cross-validation is as follows:</p>
 <ol>
 <li>Shuffle the dataset randomly while maintaining <code>x</code> and <code>y</code> pairings</li>
@@ -73,14 +52,26 @@
 <li>Calculate the mean error</li>
 </ol>
 <p>To classify our line segments we now instead choose the function that gives the lowest mean reconstruction error using k-fold cross-validation.</p>
-<h2 id="16-plotting-the-regression-line">1.6. Plotting the regression line</h2>
-<p>When the <code>--plot</code> argument is provided, a plot is displayed with the line of best fit overlayed on the data points.</p>
 <h1 id="2-figures">2. Figures</h1>
+<p>Basic Graphs:</p>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/basic_1.png" alt="basic_1" width="200"/>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/basic_2.png" alt="basic_2" width="200"/>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/basic_3.png" alt="basic_3" width="200"/>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/basic_4.png" alt="basic_4" width="200"/>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/basic_5.png" alt="basic_5" width="200"/>
+<p>Advanced graphs:</p>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/adv_1.png" alt="adv_1" width="200"/>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/adv_2.png" alt="adv_2" width="200"/>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/adv_3.png" alt="adv_3" width="200"/>
+<p>Noisy graphs:</p>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/noise_1.png" alt="noise_1" width="200"/>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/noise_2.png" alt="noise_2" width="200"/>
+<img src="file:////home/jarrod/Documents/University Work/sps_cw1/docs/noise_3.png" alt="noise_3" width="200"/>
 <h1 id="3-potential-extensions">3. Potential extensions</h1>
 <h2 id="31-continuous-lines">3.1. Continuous lines</h2>
 <p>My current solution considers each line segment independently of the others meaning that when plotted the lines do not connect. However, the lines may have been produced in such a way that it should a continous line should be produced. I'm not sure how I would go about calculating such a line of best fit but it may be more accurate to the generating functions.</p>
 <h2 id="32-more-line-functions">3.2. More line functions</h2>
-<p>The coursework only requires support for the three line functions used, which I determined to be linear, quadratic, and sinusoidal. Adding support for more line functions such as exponential could be a good extension.</p>
+<p>The coursework only requires support for the three line functions used, which I determined to be linear, cubic, and sinusoidal. Adding support for more line functions such as exponential could be a good extension.</p>
 <h2 id="33-variable-line-segment-lengths">3.3. Variable line segment lengths</h2>
 <p>All line segments in this coursework are made up of 20 data points and my solution uses this to easily split the data up. Support for line segments of any length could be a nice thing to add. However this would require a way to work out when line segments start/end which may be complicated.</p>
 
