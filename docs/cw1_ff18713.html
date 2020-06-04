@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CW1: An Unknown Signal <!-- omit in toc --></title>
+        <style>
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="cw1-an-unknown-signal-">CW1: An Unknown Signal <!-- omit in toc --></h1>
+<p><strong>Table of contents</strong></p>
+<ul>
+<li><a href="#1-implementation">1. Implementation</a>
+<ul>
+<li><a href="#11-determining-the-line-functions">1.1. Determining the line functions</a></li>
+<li><a href="#12-splitting-the-data">1.2. Splitting the data</a></li>
+<li><a href="#13-estimating-function-variables">1.3. Estimating function variables</a></li>
+<li><a href="#14-calculating-error">1.4. Calculating error</a></li>
+<li><a href="#15-line-classification">1.5. Line classification</a></li>
+<li><a href="#16-plotting-the-regression-line">1.6. Plotting the regression line</a></li>
+</ul>
+</li>
+<li><a href="#2-figures">2. Figures</a></li>
+<li><a href="#3-potential-extensions">3. Potential extensions</a>
+<ul>
+<li><a href="#31-continuous-lines">3.1. Continuous lines</a></li>
+<li><a href="#32-more-line-functions">3.2. More line functions</a></li>
+<li><a href="#variable-line-segment-lengths">Variable line segment lengths</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="1-implementation">1. Implementation</h1>
+<h2 id="11-determining-the-line-functions">1.1. Determining the line functions</h2>
+<p>Line classification is a large part of this project so the first thing to do is define the set of potential line types. For each of the training sets provided, a plot was generated. By examining these plots the line functions can be determined to be linear, quadratic, and sinusoidal.</p>
+<h2 id="12-splitting-the-data">1.2. Splitting the data</h2>
+<p>Each line segment is exactly 20 data points. As each line segment is being considered individually, the first step is to separate the data into chunks. This can be done simply using <code>numpy.array_split(data, len(data // 20))</code>.</p>
+<h2 id="13-estimating-function-variables">1.3. Estimating function variables</h2>
+<p>Least squares regression is a method of estimating the function variables used to generate a line.</p>
+<p>The matrix form formula of least squares is given by <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>=</mo><mo stretchy="false">(</mo><msup><mi>X</mi><mi>T</mi></msup><mi mathvariant="normal">.</mi><mi>X</mi><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><mi mathvariant="normal">.</mi><msup><mi>X</mi><mi>T</mi></msup><mi mathvariant="normal">.</mi><mi>Y</mi><mo>=</mo><mo stretchy="false">[</mo><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><msup><mi>b</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">A=(X^T.X)^{-1}.X^T.Y=[a&#x27;, b&#x27;, ...]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault">A</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.0913309999999998em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord">.</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mord">.</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord">.</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.001892em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord"><span class="mord mathdefault">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">b</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">.</span><span class="mord">.</span><span class="mord">.</span><span class="mclose">]</span></span></span></span>. This can be easily represented with <code>numpy.linalg.inv(X.T.dot(X)).dot(X.T).dot(Y)</code>.</p>
+<h2 id="14-calculating-error">1.4. Calculating error</h2>
+<p>The reconstruction error of our generated regression lines is the sum squared error. The formula for calculating the sum squared error is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>i</mi></msub><mo stretchy="false">(</mo><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sum_i (\hat{y}_i - y_i)^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0497100000000001em;vertical-align:-0.29971000000000003em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.16195399999999993em;"><span style="top:-2.40029em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.29971000000000003em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.19444em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> which can be calculated with <code>numpy.sum((y_hat - y) ** 2)</code>.</p>
+<h2 id="15-line-classification">1.5. Line classification</h2>
+<p>Lines can be simply classified as the function which gives the lowest reconstruction error. However, each line segment is made up of only 20 data points; this is quite limited in size and means any outliers may have a large effect on the model and lead to overfitting.</p>
+<p>To prevent this overfit, a model validation technique such as k-fold cross-validation can be used. In my implementation I chose to use a k-value of 10.</p>
+<p>The process of performing k-fold cross-validation is as follows:</p>
+<ol>
+<li>Shuffle the dataset randomly while maintaining <code>x</code> and <code>y</code> pairings</li>
+<li>Split the dataset into <code>k</code> groups of approximately equal size</li>
+<li>For each group:
+<ol>
+<li>Use the group as a test set</li>
+<li>Form a training set from the remaining groups</li>
+<li>Estimate a regression line using the training data and calculate it's sum-squared error against the test data</li>
+</ol>
+</li>
+<li>Calculate the mean error</li>
+</ol>
+<p>To classify our line segments we now instead choose the function that gives the lowest mean reconstruction error using k-fold cross-validation.</p>
+<h2 id="16-plotting-the-regression-line">1.6. Plotting the regression line</h2>
+<p>When the <code>--plot</code> argument is provided, a plot is displayed with the line of best fit overlayed on the data points.</p>
+<h1 id="2-figures">2. Figures</h1>
+<h1 id="3-potential-extensions">3. Potential extensions</h1>
+<h2 id="31-continuous-lines">3.1. Continuous lines</h2>
+<p>My current solution considers each line segment independently of the others meaning that when plotted the lines do not connect. However, the lines may have been produced in such a way that it should a continous line should be produced. I'm not sure how I would go about calculating such a line of best fit but it may be more accurate to the generating functions.</p>
+<h2 id="32-more-line-functions">3.2. More line functions</h2>
+<p>The coursework only requires support for the three line functions used, which I determined to be linear, quadratic, and sinusoidal. Adding support for more line functions such as exponential could be a good extension.</p>
+<h2 id="33-variable-line-segment-lengths">3.3. Variable line segment lengths</h2>
+<p>All line segments in this coursework are made up of 20 data points and my solution uses this to easily split the data up. Support for line segments of any length could be a nice thing to add. However this would require a way to work out when line segments start/end which may be complicated.</p>
+
+    </body>
+    </html>
